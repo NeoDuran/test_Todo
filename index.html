@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영단어 TODO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState } = React;
+        const e = React.createElement;
+
+        const App = () => {
+            const [todos, setTodos] = useState([]);
+            const [inputValue, setInputValue] = useState('');
+            const [message, setMessage] = useState('');
+
+            const addTodo = () => {
+                if (inputValue.trim() !== '') {
+                    const newTodo = {
+                        id: Date.now(),
+                        text: inputValue,
+                        date: new Date().toLocaleDateString(),
+                        completed: false,
+                    };
+                    setTodos([...todos, newTodo]);
+                    setInputValue('');
+                }
+            };
+
+            const toggleTodo = (id) => {
+                setTodos(
+                    todos.map((todo) =>
+                        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+                    )
+                );
+            };
+
+            const deleteTodo = (id) => {
+                setTodos(todos.filter((todo) => todo.id !== id));
+            };
+
+            const addRandomWords = () => {
+                const randomWords = ['apple', 'banana', 'cherry', 'date', 'elderberry'];
+                const newTodos = randomWords.map((word) => ({
+                    id: Date.now() + Math.random(),
+                    text: word,
+                    date: new Date().toLocaleDateString(),
+                    completed: false,
+                }));
+                setTodos([...todos, ...newTodos]);
+                setMessage('5개의 랜덤 단어가 추가되었습니다!');
+                setTimeout(() => setMessage(''), 3000);
+            };
+
+            return e('div', { className: "container mx-auto p-4 max-w-md" },
+                e('h1', { className: "text-3xl font-bold mb-4 text-center" }, "영단어 TODO"),
+                e('div', { className: "flex mb-4" },
+                    e('input', {
+                        type: "text",
+                        value: inputValue,
+                        onChange: (e) => setInputValue(e.target.value),
+                        className: "flex-grow p-2 border rounded-l",
+                        placeholder: "영단어 입력..."
+                    }),
+                    e('button', {
+                        onClick: addTodo,
+                        className: "bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600"
+                    }, "추가")
+                ),
+                e('button', {
+                    onClick: addRandomWords,
+                    className: "w-full bg-green-500 text-white p-2 rounded mb-4 hover:bg-green-600"
+                }, "영단어 추가 (랜덤 5개)"),
+                message && e('div', { className: "bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4", role: "alert" },
+                    e('p', null, message)
+                ),
+                e('ul', null, 
+                    todos.map((todo) => 
+                        e('li', {
+                            key: todo.id,
+                            className: "flex items-center bg-gray-100 p-2 rounded mb-2"
+                        },
+                            e('input', {
+                                type: "checkbox",
+                                checked: todo.completed,
+                                onChange: () => toggleTodo(todo.id),
+                                className: "mr-2"
+                            }),
+                            e('span', { 
+                                className: `flex-grow ${todo.completed ? 'line-through' : ''}`
+                            }, `${todo.text} - ${todo.date}`),
+                            e('button', {
+                                onClick: () => deleteTodo(todo.id),
+                                className: "bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                            }, "삭제")
+                        )
+                    )
+                )
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(e(App));
+    </script>
+</body>
+</html>
